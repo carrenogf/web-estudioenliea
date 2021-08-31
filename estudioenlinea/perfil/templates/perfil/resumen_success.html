@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        {% if cont %}
+            <h1>{{cont}}</h1>
+            <br>
+        {% endif %}
+        <form action="" method="POST">{% csrf_token %}
+            <div class="form-row">
+            <div class="col-md-3 mb-3">
+                <label for="fecha_desde">Fecha desde</label>
+                <input type="date" class="form-control" id="fecha_desde" name="fecha_desde">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="fecha_hasta">Fecha hasta</label>
+                <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta">
+            </div>
+            </div>
+
+                <input type="submit" name="reporte" value="Emitidos" class="btn btn-primary">
+                <input type="submit" name="reporte" value="Recibidos" class="btn btn-primary">
+        </form>
+    </div>
+    <div class="container-fluid">
+        {% if messages %}
+            <br>
+            {% for message in messages %}
+            <p style="color: red;">{{ message }} </p>            
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% if df_html %}
+        <div class="container-fluid">    
+            <h2>{{titulo}}</h2>
+            {% if desde %}
+                <br>
+                <p>Comprobantes desde <b>{{desde}}</b></p>
+            {% endif %}
+            {% if hasta %}
+                <p>Comprobantes hasta <b>{{hasta}}</b></p>
+                <br>
+            {% endif %}
+            <div class="table-responsive">
+                {{df_html|safe}}
+                <br>
+            </div>
+            <div class="table-responsive">
+                <br>
+                <p><b>Totales</b></p>
+                {{df_html_totales|safe}}
+            </div>
+            <br>
+            <div class="container m-0">
+                {% if grafico %}
+                    {{grafico|safe}}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    
+{% endblock content %}
+    

@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+{% block content %}
+    <br>
+    <div class="container">
+        {% if mensaje %}
+        <div class="alert alert-success" role="alert">
+            {{ mensaje }}
+          </div>
+        {% endif %}
+        {% if cont %}
+                    
+        <div>
+            <h2>{{ cont }}</h2>
+        </div>
+        
+        {% if ultimos_movimientos %}
+        <div>
+            <br>
+            <h4>Ultimos movimientos</h4>
+            <br>
+            {{ultimos_movimientos|safe}}
+        </div>
+        {% endif %}
+        <div class="container-sm"></div>
+
+        {% endif %}
+    </div>
+{% endblock content %}

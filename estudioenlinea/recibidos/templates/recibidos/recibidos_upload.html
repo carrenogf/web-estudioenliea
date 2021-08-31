@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% block content %}
+<main role="main">
+  <div class="container">
+    <div class="row mt-3 mb-5">
+      <div class="col-md-9 mx-auto">
+        <h1>Carga de Comprobantes Recibidos</h1>
+        <br>
+        {% if messages %}
+          {% for message in messages %}
+            <p style="color: green;">{{ message }} </p>            
+          {% endfor %}
+        {% endif %}
+          
+        <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+                    {{ form.as_p }}
+                <div class="text-center">
+                  <input type="submit" class="btn btn-primary btn-block" value="Cargar Archivo" />
+                </div>
+            </form>
+        {% if tabla %}
+            <p>{{ tabla|safe }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
