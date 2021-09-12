@@ -67,48 +67,46 @@ def recibidos_anual(tabla):
 
     # ****************** REPORTES PERFIL CLIENTE *******************
 
-def ultimos_movimientos(df_emitidos,df_recibidos):
-    df_emitidos['Fecha']=pd.to_datetime(df_emitidos['Fecha'])
-    df_emitidos['Año']= df_emitidos['Fecha'].dt.year
-    df_emitidos['Mes'] = df_emitidos['Fecha'].dt.month
-    df_emitidos['Año_Mes'] = df_emitidos['Año'].map(str) + '-' +df_emitidos['Mes'].map(str)
+def ultimos_movimientos(emitidos,recibidos):
+    df_emitidos = None
+    df_recibidos = None
+    df_html = None
+    if emitidos:
+        df_emitidos = pd.DataFrame(emitidos)
+        df_emitidos['Fecha']=pd.to_datetime(df_emitidos['Fecha'])
+        df_emitidos['Año']= df_emitidos['Fecha'].dt.year
+        df_emitidos['Mes'] = df_emitidos['Fecha'].dt.month
+        df_emitidos['Año_Mes'] = df_emitidos['Año'].map(str) + '-' +df_emitidos['Mes'].map(str)
+        NC_emi = df_emitidos['Tipo'].str.contains("Nota de Crédito",case=False)
+        df_emitidos.loc[NC_emi,'Total_pesos']=df_emitidos.loc[NC_emi,'Total_pesos']*(-1)
+        df_emitidos['Operación'] = "Ventas"
+  
 
-    df_recibidos['Fecha']=pd.to_datetime(df_recibidos['Fecha'])
-    df_recibidos['Año']= df_recibidos['Fecha'].dt.year
-    df_recibidos['Mes'] = df_recibidos['Fecha'].dt.month
-    df_recibidos['Año_Mes'] = df_recibidos['Año'].map(str) + '-' +df_recibidos['Mes'].map(str)
+    if recibidos:
+        df_recibidos = pd.DataFrame(recibidos)
+        df_recibidos['Fecha']=pd.to_datetime(df_recibidos['Fecha'])
+        df_recibidos['Año']= df_recibidos['Fecha'].dt.year
+        df_recibidos['Mes'] = df_recibidos['Fecha'].dt.month
+        df_recibidos['Año_Mes'] = df_recibidos['Año'].map(str) + '-' +df_recibidos['Mes'].map(str)
+        NC_rec = df_recibidos['Tipo'].str.contains("Nota de Crédito",case=False)
+        df_recibidos.loc[NC_rec,'Total_pesos']=df_recibidos.loc[NC_rec,'Total_pesos']*(-1)
 
-    ultimos_recibidos = df_recibidos['Año_Mes'].unique().tolist()[:6]
-    ultimos_emitidos = df_emitidos['Año_Mes'].unique().tolist()[:6]
-    ultimos = ultimos_emitidos+ultimos_recibidos
-    ultimos_periodos = []
- 
-    for mes in ultimos:
-        if mes not in ultimos_periodos:
-             ultimos_periodos.append(mes)
+    if emitidos or recibidos:
+        df = pd.concat([df_emitidos,df_recibidos])
+        
+        ultimos_periodos = df['Año_Mes'].unique().tolist()[:6]
+        df=df[df.Año_Mes.isin(ultimos_periodos)]
+        df['Operación'].fillna('Compras', inplace = True)
 
-    df_emitidos=df_emitidos[df_emitidos.Año_Mes.isin(ultimos_periodos)]
-    df_recibidos=df_recibidos[df_recibidos.Año_Mes.isin(ultimos_periodos)]
+        df = pd.pivot_table(df,index='Operación', columns=['Año','Mes'],values='Total_pesos',aggfunc=np.sum).fillna(0)
+        df= df.applymap("{:,.2f}".format)   
+        meses = df.columns
+        lista_meses = []
+        for mes in meses:
+            col = str(mes[1])+'-'+str(mes[0])
+            lista_meses.append(col)
 
-    NC_rec = df_recibidos['Tipo'].str.contains("Nota de Crédito",case=False)
-    df_recibidos.loc[NC_rec,'Total_pesos']=df_recibidos.loc[NC_rec,'Total_pesos']*(-1)
+        df.columns=lista_meses
+        df_html = df.to_html(classes=["table table-striped","text-right"])
 
-    NC_emi = df_emitidos['Tipo'].str.contains("Nota de Crédito",case=False)
-    df_emitidos.loc[NC_rec,'Total_pesos']=df_emitidos.loc[NC_emi,'Total_pesos']*(-1)
-
-    df_emitidos['Operación'] = "Ventas"
-    df = pd.concat([df_emitidos,df_recibidos])
-    df['Operación'].fillna('Compras', inplace = True)
-
-    df = pd.pivot_table(df,index='Operación', columns=['Año','Mes'],values='Total_pesos',aggfunc=np.sum).fillna(0)
-    df= df.applymap("{:,.2f}".format)   
-    meses = df.columns
-    lista_meses = []
-    for mes in meses:
-        print(mes)
-        col = str(mes[1])+'-'+str(mes[0])
-        lista_meses.append(col)
-
-    df.columns=lista_meses
-
-    return df.to_html(classes=["table table-striped","text-right"])
+    return df_html

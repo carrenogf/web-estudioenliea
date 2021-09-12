@@ -1,29 +1,43 @@
-from django.db.models.expressions import Exists
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from numpy.testing._private.utils import memusage
+from django.utils.decorators import method_decorator
 from emitidos.models import ComprobantesEmitidos
 from recibidos.models import ComprobantesRecibidos
-from contribuyente.models import Contribuyente
+from contribuyente.models import Contribuyente, Notificaciones
 from .forms import resumen_form
 from django.contrib import messages
 from .scripts import emitidos_anual, recibidos_anual, ultimos_movimientos
 import pandas as pd
 import datetime as dt
+from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
+
 # Create your views here.
 
 #perfil del cliente------------------
 
 @login_required
 def perfil(request):
+    emitidos = None
+    recibidos = None
+    notificaciones = None
+
     if Contribuyente.objects.filter(Usuario=request.user.id).exists():
         cont = Contribuyente.objects.get(Usuario=request.user.id)
-        emitidos = ComprobantesEmitidos.objects.filter(Contribuyente_id=cont.id).values()
-        recibidos = ComprobantesRecibidos.objects.filter(Contribuyente_id=cont.id).values()
-        df_emitidos = pd.DataFrame(emitidos)
-        df_recibidos = pd.DataFrame(recibidos)
-        ultimos_mov = ultimos_movimientos(df_emitidos,df_recibidos)
+        if ComprobantesEmitidos.objects.filter(Contribuyente_id=cont.id).exists():
+            emitidos = ComprobantesEmitidos.objects.filter(Contribuyente_id=cont.id).values()
+        if ComprobantesRecibidos.objects.filter(Contribuyente_id=cont.id).exists():
+            recibidos = ComprobantesRecibidos.objects.filter(Contribuyente_id=cont.id).values()
+        if Notificaciones.objects.filter(Contribuyente_id=cont.id).exists():  
+            notificaciones = Notificaciones.objects.filter(Contribuyente_id=cont.id).values()
+        
+        if notificaciones:
+            notificaciones = list(notificaciones)
+            if len(notificaciones)>10:
+                notificaciones = notificaciones[:10] #solo 10 ultimas notificaciones para el perfil
+
+        ultimos_mov = ultimos_movimientos(emitidos,recibidos)
 
         mensaje = "Bienvenido!"       
 
@@ -33,12 +47,34 @@ def perfil(request):
                     'emitidos':emitidos,
                     'mensaje':mensaje,
                     'ultimos_movimientos':ultimos_mov,
+                    'notificaciones':notificaciones,
                     }
 
         return render(request,'perfil/perfil.html',context=contexto)
     else:
         mensaje = "Este usuario no posee un contribuyente asociado a su perfil"
         return render(request,'perfil/perfil.html',{'mensaje':mensaje})
+
+@method_decorator(login_required, name='dispatch')
+class NotificacionesDetailView(DetailView):
+    model= Notificaciones
+  
+    def get_queryset(self):
+        #queryset = super(Notificaciones, self).get_queryset()
+        cont = Contribuyente.objects.get(Usuario=self.request.user.id)
+        return Notificaciones.objects.filter(Contribuyente_id=cont)
+
+@method_decorator(login_required, name='dispatch')
+class NotificacionesListView(ListView):
+    model= Notificaciones
+  
+    def get_queryset(self):
+        #queryset = super(Notificaciones, self).get_queryset()
+        cont = Contribuyente.objects.get(Usuario=self.request.user.id)
+        return Notificaciones.objects.filter(Contribuyente_id=cont)   
+    
+
+
 
 #Herramientas del contador----------------
 
@@ -108,7 +144,7 @@ def resumen_success(request):
                         tabla = tabla.filter(Fecha__lte=dt.date(int(hasta[:4]),int(hasta[5:7]),int(hasta[8:10])))
                     tabla = tabla.values()
                     if len(tabla)>0:
-                        df_html, df_html_totales, grafico = emitidos_anual(tabla)
+                        df_html, df_html_totales, grafico = recibidos_anual(tabla)
                     else:
                         messages.info(request,"No se encontraron registros de comprobantes recibidos en el periodo consultado")
                         df_html = None

@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1>{{object.Titulo}}</h1>
+    <br>
+    
+    {% if object.Mensaje %}
+        <p>{{object.Mensaje}}</p>
+        <br>
+    {% endif %}
+        
+
+    <ul>
+        
+        {% if object.url1 %}
+            <li><a href="{{object.url1}}" target="_blank">{{ object.url1 }}</a></li>
+        {% endif %}
+
+        {% if object.url2 %}
+            <li><a href="{{object.url2}}" target="_blank">{{ object.url2 }}</a></li>
+        {% endif %}
+
+        {% if object.url3 %}
+            <li><a href="{{object.url3}}" target="_blank">{{ object.url3 }}</a></li>
+        {% endif %}
+
+        {% if object.url4 %}
+            <li><a href="{{object.url4}}" target="_blank">{{ object.url4 }}</a></li>
+        {% endif %}
+
+        {% if object.url5 %}
+            <li><a href="{{object.url5}}" target="_blank">{{ object.url5 }}</a></li>
+        {% endif %}
+
+    </ul>
+
+    <a href="{% url 'perfil' %}">Volver</a>
+</div>
+
+
+
+
+{% endblock content %}
+

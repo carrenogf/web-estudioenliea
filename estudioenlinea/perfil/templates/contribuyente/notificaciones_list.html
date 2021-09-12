@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+{% if object_list %}
+    <div class="container mt-5">
+        <h1>Notificaciones del Contador</h1>
+        <br>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <th class="bg-primary">Fecha</th>
+                    <th class="bg-primary">Título</th>
+                    <th class="bg-primary">Contenido</th>
+                    <th class="bg-primary">Links</th>
+                </thead>
+                <tbody>
+                    
+                    {% for n in object_list %}
+                    <tr>
+                        <td>{{n.created}}</td>
+                        <td>{{n.Titulo}}</td>
+                        <td>{{n.Mensaje}}</td>
+                        <td class="m-o">                        
+                            {% if n.url1 %}
+                                <p class = "m-0 p-0"><a href="{{n.url1}}">Link_1</a></p>
+                            {% endif %}
+
+                            {% if n.url2 %}
+                                <p class="m-0 p-0"><a href="{{n.url2}}">Link_2</a></p>
+                            {% endif %}
+                            
+                            {% if n.url3 %}
+                                <p class="m-0 p-0"><a href="{{n.url3}}">Link_3</a></p>
+                            {% endif %}
+
+                            {% if n.url4 %}
+                                <p class="m-0 p-0"><a href="{{n.url4}}">Link_4</a></p>
+                            {% endif %}
+
+                            {% if n.url5 %}
+                                <p class="m-0 p-0"><a href="{{n.url5}}">Link_5</a></p>
+                            {% endif %}                       
+                        </td> 
+                    </tr>
+                    {% endfor %}
+                        
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% for n in object_list %}
+    
+        
+    {% endfor %}
+        
+    
+{% endif %}
+    
+
+{% endblock content %}

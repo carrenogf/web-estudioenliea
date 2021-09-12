@@ -1,28 +1,68 @@
 {% extends 'core/base.html' %}
+{% load static %}
+
+<link href="{% static 'perfil/css/perfil.css' %}" rel="stylesheet" type="text/css">
+
+
 {% block content %}
     <br>
-    <div class="container">
-        {% if mensaje %}
-        <div class="alert alert-success" role="alert">
-            {{ mensaje }}
-          </div>
-        {% endif %}
-        {% if cont %}
-                    
-        <div>
-            <h2>{{ cont }}</h2>
-        </div>
-        
-        {% if ultimos_movimientos %}
-        <div>
-            <br>
-            <h4>Ultimos movimientos</h4>
-            <br>
-            {{ultimos_movimientos|safe}}
-        </div>
-        {% endif %}
-        <div class="container-sm"></div>
+    <div class="container-fluid">
+        <div class="row">
+            
+            <div class="col-9">
+                <div class="table table-responsive">
+                    {% if mensaje %}
+                        <div class="alert alert-primary" role="alert">
+                            {{ mensaje }}
+                        </div>
+                    {% endif %}
+                    {% if cont %}
+                                
+                        <div>
+                            <h2>{{ cont }}</h2>
+                        </div>
+                        
+                        {% if ultimos_movimientos %}
+                            <div class="table-sm table-light table-responsive">
+                                <br>
+                                <h4>Ultimos movimientos</h4>
+                                <br>
+                                {{ultimos_movimientos|safe}}
+                            </div>
+                        {% endif %}
+             
+            
+                    {% endif %}
+                </div>
+            </div>
 
-        {% endif %}
+
+            <div class="col-3">
+                <div class="container-fluid">
+                    {% if notificaciones %}
+                    <ul class="list-group p-0 m-0" >
+                        <li class="list-group-item active">Notificaciones del Contador</li>
+                        {% for notificacion in notificaciones  %}
+                            <li class="list-group-item">
+                                <a class="link-secondary" href="{% url 'notificacion' notificacion.id %}">{{ notificacion.Titulo }}</a>
+                            </li>
+                        {% endfor %}
+                        <p class="text-right p-1"><a href="{% url 'notificaciones' %}">Ver todas...</a></p>
+                    </ul>
+                    {% else %}
+                        <p>Usted no posee notificaiones</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
+
+
+
+
+
+
+
+
+
 {% endblock content %}
